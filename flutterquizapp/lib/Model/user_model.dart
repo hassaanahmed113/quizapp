@@ -2,8 +2,8 @@ class UserModel {
   String id;
   String email;
   String name;
-  String correct;
-  String wrong;
+  int correct;
+  int wrong;
 
   UserModel(
       {required this.id,

@@ -63,7 +63,7 @@ class FirebaseServicesProvider extends ChangeNotifier {
       } else if (e.code == 'weak-password') {
         errorMessage = "Enter password more than 6 characters";
       } else {
-        errorMessage = "Try again";
+        errorMessage = "Already exist";
       }
       var snackbar = SnackBar(content: Text(errorMessage));
       ScaffoldMessenger.of(context).showSnackBar(snackbar);

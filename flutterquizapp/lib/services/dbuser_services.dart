@@ -15,8 +15,8 @@ class DbuserServices extends ChangeNotifier {
             id: User.id,
             email: User.email,
             name: User.name,
-            correct: '0',
-            wrong: '0');
+            correct: 0,
+            wrong: 0);
         await quizdatauser.doc(user.uid).set(uuserr.toMap());
       }
     } catch (e) {
@@ -24,12 +24,27 @@ class DbuserServices extends ChangeNotifier {
     }
   }
 
-  void selectOpponent(OpponentModel selectedOpponent) {
-    opponentid = selectedOpponent.id;
-    notifyListeners();
+  Stream<List<UserModel>> getCurrentUser() {
+    FirebaseAuth auth = FirebaseAuth.instance;
+    final user = auth.currentUser;
+    if (user != null) {
+      CollectionReference items = FirebaseFirestore.instance.collection('user');
+      return items.where('id', isEqualTo: user.uid).snapshots().map((snapshot) {
+        return snapshot.docs.map((doc) {
+          return UserModel(
+            id: doc['id'],
+            email: doc['email'],
+            name: doc['name'],
+            correct: doc['correct'],
+            wrong: doc['wrong'],
+          );
+        }).toList();
+      });
+    }
+    // If there is no currently authenticated user, return an empty stream.
+    return Stream.value([]);
   }
 
-  String opponentid = '';
   Stream<List<OpponentModel>> getOpponentUser() {
     FirebaseAuth auth = FirebaseAuth.instance;
     final user = auth.currentUser;

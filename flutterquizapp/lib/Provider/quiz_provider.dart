@@ -15,13 +15,13 @@ class QuizProvider extends ChangeNotifier {
 
   int correct = 0;
   int wrong = 0;
-  calculateResult(index) async {
+  calculateResult(index) {
     final user = FirebaseAuth.instance.currentUser;
     if (answers[index] == providedanswers[index]) {
       correct += 1;
       var snapshots = FirebaseFirestore.instance.collection('user');
       final user = FirebaseAuth.instance.currentUser;
-      await FirebaseFirestore.instance
+      FirebaseFirestore.instance
           .collection("user")
           .doc(user!.uid)
           .update({'correct': correct});
@@ -30,7 +30,7 @@ class QuizProvider extends ChangeNotifier {
       wrong += 1;
       var snapshots = FirebaseFirestore.instance.collection('user');
       final user = FirebaseAuth.instance.currentUser;
-      await FirebaseFirestore.instance
+      FirebaseFirestore.instance
           .collection("user")
           .doc(user!.uid)
           .update({'wrong': wrong});

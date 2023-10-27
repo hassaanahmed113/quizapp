@@ -28,92 +28,110 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey[200],
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        backgroundColor: Colors.blue,
-        centerTitle: true,
-        title:
-            cus.textCus("QUIZ APP", 23, FontWeight.bold, AppColor().textColor),
-        actions: [
-          Consumer<FirebaseServicesProvider>(
-            builder: (context, firebaseprovider, child) {
-              return Consumer<QuizProvider>(
-                builder: (context, quizProvider, child) {
-                  return IconButton(
-                      onPressed: () {
-                        firebaseprovider.signoutFunction(context);
+    return value - 1 != 2
+        ? Scaffold(
+            backgroundColor: Colors.grey[200],
+            appBar: AppBar(
+              automaticallyImplyLeading: false,
+              backgroundColor: Colors.blue,
+              centerTitle: true,
+              title: cus.textCus(
+                  "QUIZ APP", 23, FontWeight.bold, AppColor().textColor),
+              actions: [
+                Consumer<FirebaseServicesProvider>(
+                  builder: (context, firebaseprovider, child) {
+                    return Consumer<QuizProvider>(
+                      builder: (context, quizProvider, child) {
+                        return IconButton(
+                            onPressed: () {
+                              firebaseprovider.signoutFunction(context);
 
-                        setState(() {
-                          quizProvider.answers.clear();
-                          quizProvider.providedanswers.clear();
-                          quizProvider.correct = 0;
-                          quizProvider.wrong = 0;
-                        });
+                              setState(() {
+                                quizProvider.answers.clear();
+                                quizProvider.providedanswers.clear();
+                                quizProvider.correct = 0;
+                                quizProvider.wrong = 0;
+                              });
+                            },
+                            icon: Icon(
+                              Icons.logout,
+                              color: Colors.white,
+                            ));
                       },
-                      icon: Icon(
-                        Icons.logout,
-                        color: Colors.white,
-                      ));
-                },
-              );
-            },
-          ),
-        ],
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            StreamBuilder<List<OpponentModel>>(
-              stream: dbopponent.getOpponentUser(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return CircularProgressIndicator(
-                    color: Colors.white,
-                  );
-                }
-                if (snapshot.hasError) {
-                  return Text('Error: ${snapshot.error}');
-                }
-                if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return Text('No items found.');
-                }
-                return Expanded(
-                  flex: 1,
-                  child: ListView.builder(
-                    itemCount: 1,
-                    itemBuilder: (context, index) {
-                      final opponent = snapshot.data![index];
-                      return Center(
-                        child: Text(
-                            "Opponent: ${opponent.name} Correct: ${opponent.correct} Wrong: ${opponent.wrong}"),
+                    );
+                  },
+                ),
+              ],
+            ),
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  StreamBuilder<List<OpponentModel>>(
+                    stream: dbopponent.getOpponentUser(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return CircularProgressIndicator(
+                          color: Colors.transparent,
+                        );
+                      }
+                      if (snapshot.hasError) {
+                        return Text('Error: ${snapshot.error}');
+                      }
+                      if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                        return Text('No User Available');
+                      }
+                      return ListView.builder(
+                        itemCount: 1,
+                        shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
+                        itemBuilder: (context, index) {
+                          final opponent = snapshot.data![index];
+                          return Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  cus.textCus("Opponent: ${opponent.name} ", 20,
+                                      FontWeight.bold, AppColor().blackColor),
+                                  cus.textCus("Correct: ", 20, FontWeight.bold,
+                                      AppColor().blackColor),
+                                  cus.textCus("${opponent.correct}", 20,
+                                      FontWeight.bold, AppColor().correctColor),
+                                  cus.textCus(" Wrong: ", 20, FontWeight.bold,
+                                      AppColor().blackColor),
+                                  cus.textCus("${opponent.wrong}", 20,
+                                      FontWeight.bold, AppColor().wrongColor)
+                                ],
+                              ),
+                            ),
+                          );
+                        },
                       );
                     },
                   ),
-                );
-              },
-            ),
-            StreamBuilder<List<QuestionModel>>(
-                stream: db.getItems(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return CircularProgressIndicator();
-                  }
-                  if (snapshot.hasError) {
-                    return Text('Error: ${snapshot.error}');
-                  }
-                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return Text('No items found.');
-                  }
-                  return Expanded(
-                      flex: 1,
-                      child: Consumer<QuizProvider>(
-                          builder: (context, quizprovider, child) {
-                        return value - 1 != 2
-                            ? ListView.builder(
+                  cus.sizeboxCus(30),
+                  StreamBuilder<List<QuestionModel>>(
+                      stream: db.getItems(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return CircularProgressIndicator();
+                        }
+                        if (snapshot.hasError) {
+                          return Text('Error: ${snapshot.error}');
+                        }
+                        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                          return Text('No items found.');
+                        }
+                        return Expanded(
+                            flex: 1,
+                            child: Consumer<QuizProvider>(
+                                builder: (context, quizprovider, child) {
+                              return ListView.builder(
                                 shrinkWrap: true,
                                 physics: NeverScrollableScrollPhysics(),
                                 itemCount: 1,
@@ -143,7 +161,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                         .toString());
                                                     quizprovider
                                                         .calculateResult(
-                                                            value + 1);
+                                                            value + 0);
                                                     value += 1;
 
                                                     setState(() {});
@@ -157,13 +175,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ],
                                   );
                                 },
-                              )
-                            : ResultScreen();
-                      }));
-                })
-          ],
-        ),
-      ),
-    );
+                              );
+                            }));
+                      })
+                ],
+              ),
+            ),
+          )
+        : ResultScreen();
   }
 }
