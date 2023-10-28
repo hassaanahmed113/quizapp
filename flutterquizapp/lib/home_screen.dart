@@ -52,6 +52,16 @@ class _HomeScreenState extends State<HomeScreen> {
                                 quizProvider.correct = 0;
                                 quizProvider.wrong = 0;
                               });
+                              final opponentUerId = dbopponent.opponentId;
+                              final user = FirebaseAuth.instance.currentUser;
+                              FirebaseFirestore.instance
+                                  .collection("user")
+                                  .doc(opponentUerId)
+                                  .update({'correct': 0, 'wrong': 0});
+                              FirebaseFirestore.instance
+                                  .collection("user")
+                                  .doc(user!.uid)
+                                  .update({'correct': 0, 'wrong': 0});
                             },
                             icon: Icon(
                               Icons.logout,
@@ -114,70 +124,88 @@ class _HomeScreenState extends State<HomeScreen> {
                     },
                   ),
                   cus.sizeboxCus(30),
-                  StreamBuilder<List<QuestionModel>>(
-                      stream: db.getItems(),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return CircularProgressIndicator();
-                        }
-                        if (snapshot.hasError) {
-                          return Text('Error: ${snapshot.error}');
-                        }
-                        if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                          return Text('No items found.');
-                        }
-                        return Expanded(
-                            flex: 1,
-                            child: Consumer<QuizProvider>(
-                                builder: (context, quizprovider, child) {
-                              return ListView.builder(
-                                shrinkWrap: true,
-                                physics: NeverScrollableScrollPhysics(),
-                                itemCount: 1,
-                                itemBuilder: (context, index) {
-                                  final item = snapshot.data![0 + value];
-                                  quizprovider.providedanswers.add(item.answer);
+                  SizedBox(
+                    height: 400,
+                    child: StreamBuilder<List<QuestionModel>>(
+                        stream: db.getItems(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return CircularProgressIndicator();
+                          }
+                          if (snapshot.hasError) {
+                            return Text('Error: ${snapshot.error}');
+                          }
+                          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                            return Text('No items found.');
+                          }
+                          return Expanded(
+                              flex: 1,
+                              child: Consumer<QuizProvider>(
+                                  builder: (context, quizprovider, child) {
+                                return ListView.builder(
+                                  shrinkWrap: true,
+                                  physics: NeverScrollableScrollPhysics(),
+                                  itemCount: 1,
+                                  itemBuilder: (context, index) {
+                                    final item = snapshot.data![0 + value];
+                                    quizprovider.providedanswers
+                                        .add(item.answer);
 
-                                  final item1 = item.option.length;
-                                  return Column(
-                                    children: [
-                                      Text(
-                                          "Question ${value + 1}: ${item.question}"),
-                                      ListView.builder(
-                                        shrinkWrap: true,
-                                        physics: NeverScrollableScrollPhysics(),
-                                        itemCount: item1,
-                                        itemBuilder: (context, index) {
-                                          final item2 = item.option[index];
-                                          return Column(
-                                            children: [
-                                              InkWell(
-                                                  onTap: () {
-                                                    quizprovider.valueChange();
-                                                    quizprovider.answers.add(
-                                                        item.option[index]);
-                                                    print(quizprovider.answers
-                                                        .toString());
-                                                    quizprovider
-                                                        .calculateResult(
-                                                            value + 0);
-                                                    value += 1;
+                                    final item1 = item.option.length;
+                                    return Column(
+                                      children: [
+                                        Text(
+                                            "Question ${value + 1}: ${item.question}"),
+                                        ListView.builder(
+                                          shrinkWrap: true,
+                                          physics:
+                                              NeverScrollableScrollPhysics(),
+                                          itemCount: item1,
+                                          itemBuilder: (context, index) {
+                                            final item2 = item.option[index];
+                                            return Column(
+                                              children: [
+                                                InkWell(
+                                                    onTap: () {
+                                                      quizprovider
+                                                          .valueChange();
+                                                      quizprovider.answers.add(
+                                                          item.option[index]);
+                                                      print(quizprovider.answers
+                                                          .toString());
+                                                      quizprovider
+                                                          .calculateResult(
+                                                              value + 0);
+                                                      value += 1;
+                                                      final user = FirebaseAuth
+                                                          .instance.currentUser;
 
-                                                    setState(() {});
-                                                  },
-                                                  child: Text(
-                                                      "${index + 1}: ${item2}")),
-                                            ],
-                                          );
-                                        },
-                                      ),
-                                    ],
-                                  );
-                                },
-                              );
-                            }));
-                      })
+                                                      FirebaseFirestore.instance
+                                                          .collection("user")
+                                                          .doc(user!.uid)
+                                                          .update({
+                                                        'totalSelectedAnswer':
+                                                            value + 0,
+                                                      });
+                                                      print(dbopponent
+                                                          .totalSelectedOpponent);
+
+                                                      setState(() {});
+                                                    },
+                                                    child: Text(
+                                                        "${index + 1}: ${item2}")),
+                                              ],
+                                            );
+                                          },
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              }));
+                        }),
+                  )
                 ],
               ),
             ),

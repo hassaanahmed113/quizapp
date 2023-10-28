@@ -34,7 +34,8 @@ class FirebaseServicesProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void signupFunction(email, password, name, correct, wrong, context) async {
+  void signupFunction(email, password, name, correct, wrong,
+      totalSelectedAnswer, context) async {
     try {
       await _auth.createUserWithEmailAndPassword(
           email: email, password: password);
@@ -46,11 +47,13 @@ class FirebaseServicesProvider extends ChangeNotifier {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
         db.addUser(UserModel(
-            id: user.uid,
-            email: email,
-            name: name,
-            correct: correct,
-            wrong: wrong));
+          id: user.uid,
+          email: email,
+          name: name,
+          correct: correct,
+          wrong: wrong,
+          totalSelectedAnswer: totalSelectedAnswer,
+        ));
       }
     } on FirebaseAuthException catch (e) {
       print(e.code);

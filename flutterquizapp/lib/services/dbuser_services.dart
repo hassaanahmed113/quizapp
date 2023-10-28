@@ -12,11 +12,13 @@ class DbuserServices extends ChangeNotifier {
       final user = auth.currentUser;
       if (user != null) {
         final uuserr = UserModel(
-            id: User.id,
-            email: User.email,
-            name: User.name,
-            correct: 0,
-            wrong: 0);
+          id: User.id,
+          email: User.email,
+          name: User.name,
+          correct: 0,
+          wrong: 0,
+          totalSelectedAnswer: 0,
+        );
         await quizdatauser.doc(user.uid).set(uuserr.toMap());
       }
     } catch (e) {
@@ -32,18 +34,21 @@ class DbuserServices extends ChangeNotifier {
       return items.where('id', isEqualTo: user.uid).snapshots().map((snapshot) {
         return snapshot.docs.map((doc) {
           return UserModel(
-            id: doc['id'],
-            email: doc['email'],
-            name: doc['name'],
-            correct: doc['correct'],
-            wrong: doc['wrong'],
-          );
+              id: doc['id'],
+              email: doc['email'],
+              name: doc['name'],
+              correct: doc['correct'],
+              wrong: doc['wrong'],
+              totalSelectedAnswer: doc['totalSelectedAnswer']);
         }).toList();
       });
     }
     // If there is no currently authenticated user, return an empty stream.
     return Stream.value([]);
   }
+
+  String opponentId = "";
+  int totalSelectedOpponent = 0;
 
   Stream<List<OpponentModel>> getOpponentUser() {
     FirebaseAuth auth = FirebaseAuth.instance;
@@ -55,16 +60,35 @@ class DbuserServices extends ChangeNotifier {
           .snapshots()
           .map((snapshot) {
         return snapshot.docs.map((doc) {
+          opponentId = doc['id'];
+          totalSelectedOpponent = doc['totalSelectedAnswer'];
           return OpponentModel(
-            id: doc['id'],
-            name: doc['name'],
-            correct: doc['correct'],
-            wrong: doc['wrong'],
-          );
+              id: doc['id'],
+              name: doc['name'],
+              correct: doc['correct'],
+              wrong: doc['wrong'],
+              totalSelectedAnswer: doc['totalSelectedAnswer']);
         }).toList();
       });
     }
     // If there is no currently authenticated user, return an empty stream.
     return Stream.value([]);
+  }
+
+  Stream<num> getTotalSelectedOpponentStream() {
+    final user = FirebaseAuth.instance.currentUser;
+    return FirebaseFirestore.instance
+        .collection('user')
+        .where('id', isNotEqualTo: user!.uid)
+        .snapshots()
+        .map((querySnapshot) {
+      num totalSelectedAnswer = 0;
+
+      for (QueryDocumentSnapshot doc in querySnapshot.docs) {
+        totalSelectedAnswer += doc['totalSelectedAnswer'] ?? 0;
+      }
+
+      return totalSelectedAnswer;
+    });
   }
 }

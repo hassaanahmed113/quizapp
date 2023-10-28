@@ -58,6 +58,7 @@ class _SignupScreenState extends State<SignupScreen> {
                               textprovider.nameController.text,
                               0,
                               0,
+                              0,
                               context);
 
                           textprovider.emailControllersignup.clear();
